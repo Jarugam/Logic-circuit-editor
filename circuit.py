@@ -58,10 +58,10 @@ class circ:
         self.update_objects()
         return 0
     
-    def finalize(self):
+    def finalize(self, i = -1):
         if not len(self.expr_list):
             raise Exception('no circuit to finalize')
-        self.circuit = self.expr_list[-1]
+        self.circuit = self.expr_list[i]
 
 def main():
     test1 = circ()
@@ -73,6 +73,7 @@ def main():
     test1.multi_gate(0, 2, 'or')
     print(test1.object_list)
     test1.finalize()
+    print(test1.circuit)
 
 if __name__ == "__main__":
     main()
