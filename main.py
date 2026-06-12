@@ -70,14 +70,29 @@ def text_ui():
 
     while True:
         choice = input("1) Add a gate\n" \
-        "2) Visualize a cirucit\n" \
+        "2) Preview a cirucit\n" \
         "3) Save an exit\n")
         match choice:
             case '1':
                 pick_a_gate(circuit)
-                print(circuit.expr_list)
+                print(f"New circuit added: {circuit.object_list[-1]}")
             case '2':
-                pass
+                if len(circuit.expr_list) == 0:
+                    print("No circuits to preview!")
+                else:
+                    while True:
+                        print("Choose a circuit to preview:")
+                        for i in range(len(circuit.expr_list)):
+                            print(f"{i + 1}) {circuit.expr_list[i]}")
+                        
+                        choice = input()
+                        if int(choice) > len(circuit.expr_list) or int(choice) < 1:
+                            print("Wrong choice!")
+                        else:
+                            break
+
+                    with schemdraw.Drawing():
+                        logicparse(circuit.expr_list[int(choice) - 1]) 
             case '3':
                 break
             case _:
