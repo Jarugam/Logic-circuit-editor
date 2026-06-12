@@ -2,6 +2,9 @@ from circuit import circ
 import schemdraw
 from schemdraw.parsing import logicparse
 import sys
+import json
+import time
+import os
 
 def pick_a_gate(circuit):
     while True:
@@ -71,11 +74,13 @@ def text_ui():
     while True:
         choice = input("1) Add a gate\n" \
         "2) Preview a cirucit\n" \
-        "3) Save an exit\n")
+        "3) Save\n" \
+        "4) Exit\n")
         match choice:
             case '1':
                 pick_a_gate(circuit)
                 print(f"New circuit added: {circuit.object_list[-1]}")
+            
             case '2':
                 if len(circuit.expr_list) == 0:
                     print("No circuits to preview!")
@@ -93,8 +98,44 @@ def text_ui():
 
                     with schemdraw.Drawing():
                         logicparse(circuit.expr_list[int(choice) - 1]) 
+            
             case '3':
+                if len(circuit.expr_list) == 0:
+                    print("There's nothing to save...")
+                else:
+                    while True:
+                        print("Choose your final circuit:")
+                        for i in range(len(circuit.expr_list)):
+                            print(f"{i + 1}) {circuit.expr_list[i]}")
+                        
+                        choice = input()
+                        if int(choice) > len(circuit.expr_list) or int(choice) < 1:
+                            print("Wrong choice!")
+                        else:
+                            break
+                    
+                    circuit.finalize(int(choice) - 1)
+                    
+                    save_file = {}
+                    save_file['circuit'] = circuit.circuit
+                    save_file['vars'] = circuit.var_list
+                    save_file['exprs'] = circuit.expr_list
+
+                    current_time = str(int(time.time()))
+                    file_path = os.path.join(os.getcwd(), 'circuits', 'saved_ciruit' + current_time + '.circ')
+                    with open(file_path, 'w') as f:
+                        f.write(json.dumps(save_file))
+                    print("Saved ciruit path: " + file_path)
+
+                    image_path = os.path.join(os.getcwd(), 'circuits', 'circuit_image' + current_time + '.svg')
+                    with schemdraw.Drawing(show = False, file = image_path):
+                        logicparse(circuit.expr_list[int(choice) - 1]) 
+                    print("Saved ciruit diagram path: " + image_path + '\n')
+                    
+
+            case '4':
                 break
+            
             case _:
                 print("Wrong choice!")
 
