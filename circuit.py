@@ -40,19 +40,36 @@ class circ:
         return 0
     
     def multi_gate(self, object1, object2, gate):
+        pop_queue = []
+
         if object1 + 1 > len(self.var_list):
-            self.expr_list.pop(object1 - len(self.var_list))
+            #self.expr_list.pop(object1 - len(self.var_list))
+            pop_queue.append(object1 - len(self.var_list))
             object1_name = '(' + self.object_list[object1] + ')'
         else:
             object1_name = self.object_list[object1]
         
         if object2 + 1 > len(self.var_list):
-            self.expr_list.pop(object2 - len(self.var_list))
+            # self.expr_list.pop(object2 - len(self.var_list))
+            pop_queue.append(object2 - len(self.var_list))
             object2_name = '(' + self.object_list[object2] + ')'
         else:
             object2_name = self.object_list[object2]
 
         new_expr = object1_name + ' ' + gate + ' ' + object2_name
+
+        if len(pop_queue) == 0:
+            pass
+        elif len(pop_queue) == 1:
+            self.expr_list.pop(pop_queue[0])
+        elif pop_queue[0] == pop_queue[1]:
+            self.expr_list.pop(pop_queue[0])
+        elif pop_queue[0] > pop_queue[1]:
+            self.expr_list.pop(pop_queue[0])
+            self.expr_list.pop(pop_queue[1])
+        elif pop_queue[1] > pop_queue[0]:
+            self.expr_list.pop(pop_queue[1])
+            self.expr_list.pop(pop_queue[0])            
 
         self.expr_list.append(new_expr)
         self.update_objects()
@@ -71,9 +88,11 @@ def main():
     test1.not_gate(1)
     test1.multi_gate(0, 2, 'and')
     test1.multi_gate(0, 2, 'or')
+    test1.multi_gate(0, 0, 'xor')
+    test1.multi_gate(2, 2, 'and')
     print(test1.object_list)
-    test1.finalize()
-    print(test1.circuit)
+    #test1.finalize()
+    #print(test1.circuit)
 
 if __name__ == "__main__":
     main()
