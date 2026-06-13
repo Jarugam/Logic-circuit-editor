@@ -41,7 +41,6 @@ class Parser:
         if token == "(":
             self.consume()
 
-            # unary NOT
             if self.peek() == "not":
                 self.consume()
                 expr = self.parse_expr()
@@ -49,7 +48,6 @@ class Parser:
                 assert self.consume() == ")"
                 return Not(expr)
 
-            # binary operation
             left = self.parse_expr()
 
             op = self.consume()
@@ -60,16 +58,50 @@ class Parser:
             assert self.consume() == ")"
 
             return Multi_gate(op, left, right)
+        
+def remove_xor(node):
+    token = node[0]
+
+    if token == "var":
+        return node
+
+    if token == "not":
+        return Not(remove_xor(node[1]))
+
+    a = remove_xor(node[1])
+    b = remove_xor(node[2])
+
+    if token in ("and", "or"):
+        return Multi_gate(token, a, b)
+
+    if token == "xor":
+        return Multi_gate("or",
+            Multi_gate("and", a, Not(b)),
+            Multi_gate("and", Not(a), b)
+        )
+    
+def pprint(node):
+    token = node[0]
+
+    if token == "var":
+        return node[1]
+
+    if token == "not":
+        return f"(not {pprint(node[1])})"
+
+    return (
+        f"({pprint(node[1])} "
+        f"{token} "
+        f"{pprint(node[2])})"
+    )
     
 def main():
     test_circuit1 = "((V1 or V3) and ((not V0) xor V2))"
     test_circuit2 = "(not ((V1 or V3) and ((not V0) xor V2)))"
 
-    ast = Parser(test_circuit2)
-    print(ast.tokens)
-    print(ast.parse_expr())
-    # print(ast.pos)
-    # print(ast.peek())
+    ast = Parser("(V1 xor V2)")
+    ast = ast.parse_expr()
+    print(pprint(remove_xor(ast)))
 
 
 if __name__ == "__main__":
