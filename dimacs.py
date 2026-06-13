@@ -119,6 +119,37 @@ def push_not(node):
             push_not(node[2])
         )
 
+def distribute(a, b):
+    if a[0] == "and":
+        return Multi_gate("and",
+            distribute(a[1], b),
+            distribute(a[2], b)
+        )
+
+    if b[0] == "and":
+        return Multi_gate("and",
+            distribute(a, b[1]),
+            distribute(a, b[2])
+        )
+
+    return Multi_gate("or", a, b)
+
+
+def to_cnf(node):
+    token = node[0]
+
+    if token in ("var", "not"):
+        return node
+
+    left = to_cnf(node[1])
+    right = to_cnf(node[2])
+
+    if token == "and":
+        return Multi_gate("and", left, right)
+
+    if token == "or":
+        return distribute(left, right)
+
 def pprint(node):
     token = node[0]
 
@@ -138,12 +169,13 @@ def main():
     test_circuit1 = "((V1 or V3) and ((not V0) xor V2))"
     test_circuit2 = "(not ((V1 or V3) and ((not V0) xor V2)))"
 
-    ast = Parser(test_circuit1)
+    ast = Parser("(not (V1 xor V2))")
     ast = ast.parse_expr()
     xorless = remove_xor(ast)
-    print(pprint(xorless))
     notless = push_not(xorless)
     print(pprint(notless))
+    cnf = to_cnf(notless)
+    print(pprint(cnf))
 
 
 if __name__ == "__main__":
