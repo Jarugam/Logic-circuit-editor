@@ -80,6 +80,45 @@ def remove_xor(node):
             Multi_gate("and", Not(a), b)
         )
     
+def push_not(node):
+    token = node[0]
+
+    if token == "var":
+        return node
+
+    if token == "not":
+        child = node[1]
+
+        if child[0] == "var":
+            return node
+
+        if child[0] == "not":
+            return push_not(child[1])
+
+        if child[0] == "and":
+            return Multi_gate("or",
+                push_not(Not(child[1])),
+                push_not(Not(child[2]))
+            )
+
+        if child[0] == "or":
+            return Multi_gate("and",
+                push_not(Not(child[1])),
+                push_not(Not(child[2]))
+            )
+
+    if token == "and":
+        return Multi_gate("and",
+            push_not(node[1]),
+            push_not(node[2])
+        )
+
+    if token == "or":
+        return Multi_gate("or",
+            push_not(node[1]),
+            push_not(node[2])
+        )
+
 def pprint(node):
     token = node[0]
 
@@ -99,9 +138,12 @@ def main():
     test_circuit1 = "((V1 or V3) and ((not V0) xor V2))"
     test_circuit2 = "(not ((V1 or V3) and ((not V0) xor V2)))"
 
-    ast = Parser("(V1 xor V2)")
+    ast = Parser(test_circuit1)
     ast = ast.parse_expr()
-    print(pprint(remove_xor(ast)))
+    xorless = remove_xor(ast)
+    print(pprint(xorless))
+    notless = push_not(xorless)
+    print(pprint(notless))
 
 
 if __name__ == "__main__":
