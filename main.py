@@ -16,15 +16,15 @@ def pick_a_gate(circuit):
 
         if choice1 == '1':
             while True:
-                print("Choose an object:\n")
+                print("Choose an object:")
                 circuit.print_objects()
                 choice2 = input()
-                if int(choice2) + 1 > len(circuit.object_list) or int(choice2) < 0:
+                if int(choice2) > len(circuit.object_list) or int(choice2) < 1:
                     print("Wrong choice!")
                 else:
                     break
 
-            circuit.not_gate(int(choice2))
+            circuit.not_gate(int(choice2) - 1)
             return 0
         
         elif choice1 in ['2', '3', '4']:
@@ -40,13 +40,13 @@ def pick_a_gate(circuit):
 
                 circuit.print_objects()
                 choice2 = input()
-                if int(choice2) + 1 > len(circuit.object_list) or int(choice2) < 0:
+                if int(choice2) > len(circuit.object_list) or int(choice2) < 1:
                     print("Wrong choice!")
                 else:
                     multi_choice.append(choice2)
                     count += 1
             
-            circuit.multi_gate(int(multi_choice[0]), int(multi_choice[1]), chosen_gate)
+            circuit.multi_gate(int(multi_choice[0]) - 1, int(multi_choice[1]) - 1, chosen_gate)
             return 0
         else:
             print("Wrong choice!")
@@ -55,16 +55,26 @@ def text_ui():
     while True:
         choice = input("What would you like to do today?\n" \
         "1) Create a circuit\n" \
-        "2) Edit a circuit (t.b.i.)\n" \
+        "2) Edit a circuit\n" \
         "3) Quit\n")
         match choice:
             case '1':
                 circuit = circ()
                 for i in range(4):
-                    circuit.add_var(f'V{i}')
+                    circuit.add_var(f'V{i + 1}')
                 break
             case '2':
-                pass
+                file_name = input("Provide the save file name:\n")
+                file_path = os.path.join(os.getcwd(), 'circuits', file_name)
+
+                with open(file_path, 'r') as f:
+                    save_file = json.loads(f.readline())
+                
+                circuit = circ(circuit = save_file['circuit'], 
+                                vars = save_file['vars'], 
+                                exprs = save_file['exprs']
+                                )
+                break
             case '3':
                 print("Have a nice day!")
                 sys.exit()
@@ -73,15 +83,32 @@ def text_ui():
 
     while True:
         choice = input("1) Add a gate\n" \
-        "2) Preview a cirucit\n" \
-        "3) Save\n" \
-        "4) Exit\n")
+        "2) Show details\n" \
+        "3) Preview a cirucit\n" \
+        "4) Save\n" \
+        "5) Exit\n")
         match choice:
             case '1':
                 pick_a_gate(circuit)
                 print(f"New circuit added: {circuit.object_list[-1]}")
-            
+
             case '2':
+                print(40*'-')
+                print(10*'=' + ' VARS ' + 24*'=')
+                for i in range(len(circuit.var_list)):
+                    print(f"{i + 1}) {circuit.var_list[i]}")
+
+                if circuit.expr_list != '':
+                    print(10*'=' + ' CIRCUITS ' + 20*'=')
+                    for i in range(len(circuit.expr_list)):
+                        print(f"{i + 1}) {circuit.expr_list[i]}")
+
+                if circuit.circuit != '':
+                    print(10*'=' + ' FINAL CIRCUIT ' + 15*'=')
+
+                print(40*'-')
+
+            case '3':
                 if len(circuit.expr_list) == 0:
                     print("No circuits to preview!")
                 else:
@@ -99,7 +126,7 @@ def text_ui():
                     with schemdraw.Drawing():
                         logicparse(circuit.expr_list[int(choice) - 1]) 
             
-            case '3':
+            case '4':
                 if len(circuit.expr_list) == 0:
                     print("There's nothing to save...")
                 else:
@@ -122,7 +149,7 @@ def text_ui():
                     save_file['exprs'] = circuit.expr_list
 
                     current_time = str(int(time.time()))
-                    file_path = os.path.join(os.getcwd(), 'circuits', 'saved_ciruit' + current_time + '.circ')
+                    file_path = os.path.join(os.getcwd(), 'circuits', 'saved_circuit' + current_time + '.circ')
                     with open(file_path, 'w') as f:
                         f.write(json.dumps(save_file))
                     print("Saved ciruit path: " + file_path)
@@ -132,8 +159,7 @@ def text_ui():
                         logicparse(circuit.expr_list[int(choice) - 1]) 
                     print("Saved ciruit diagram path: " + image_path + '\n')
                     
-
-            case '4':
+            case '5':
                 break
             
             case _:

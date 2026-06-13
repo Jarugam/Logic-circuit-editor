@@ -1,8 +1,8 @@
 class circ:
     __slots__ = ['circuit', 'var_list', 'expr_list', 'object_list']
 
-    def __init__(self, vars = [], exprs = []):
-        self.circuit = ''
+    def __init__(self, circuit = '', vars = [], exprs = []):
+        self.circuit = circuit
         self.var_list = vars
         self.expr_list = exprs
         self.object_list = vars + exprs
@@ -24,7 +24,7 @@ class circ:
 
     def print_objects(self):
         for i in range(len(self.object_list)):
-            print(f"{i})\t {self.object_list[i]}")
+            print(f"{i + 1})\t {self.object_list[i]}")
 
     def not_gate(self, object):
         if object + 1 > len(self.var_list):
