@@ -52,6 +52,7 @@ def pick_a_gate(circuit):
                 else:
                     multi_choice.append(choice2)
                     count += 1
+                    clear_screen()
             
             circuit.multi_gate(int(multi_choice[0]) - 1, int(multi_choice[1]) - 1, chosen_gate)
             return 0
