@@ -217,6 +217,8 @@ def ordered_append(lit_list, var):
     while lit_list != []:
         if int(lit_list[0][-1]) > int(var[-1]):
             return (read + [var] + lit_list)
+        elif int(lit_list[0][-1]) == int(var[-1]):
+            return(read + lit_list)
         read.append(lit_list.pop(0)) 
 
     read.append(var)
@@ -271,8 +273,8 @@ def to_dimacs(circuit, vars):
     return outptut
     
 def main():
-    test_circuit1 = "((V1 or V3) and ((not V0) xor V2))"
-    test_circuit2 = "(not ((V1 or V3) and ((not V0) xor V2)))"
+    test_circuit1 = "((V2 or V4) and ((not V1) xor V3))"
+    test_circuit2 = "(not ((V2 or V4) and ((not V1) xor V3)))"
 
     # ast = Parser('(((not V1) xor V2) or (not ((not V4) and V3)))')
     # ast = Parser(test_circuit2)
@@ -289,7 +291,7 @@ def main():
     # ordered = order_literals(truthless)
     # print(ordered)
 
-    dimacs_test = to_dimacs(test_circuit2, ['V0', 'V1', 'V2', 'V3'])
+    dimacs_test = to_dimacs(test_circuit1, ['V0', 'V1', 'V2', 'V3'])
     for line in dimacs_test:
         print(line, end='')
 
