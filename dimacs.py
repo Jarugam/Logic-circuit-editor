@@ -177,25 +177,24 @@ def into_clauses(node):
         return [[node[1]]]
     
     if token == 'not':
-        return [['not ' + node[1][1]]]
-    
+        return [['not ' + node[1][1]]] 
+
 def remove_truth(clauses, vars):
-    j = 0
-    while j < len(clauses):
-        for var in vars:
-            if (var in clauses[j]) and (('not ' + var) in clauses[j]):
-                i = 0
-                while i < len(clauses[j]):
-                    if (clauses[j][i] == var) or (clauses[j][i] == 'not ' + var):
-                        clauses[j].pop(i)
-                    else:
-                        i += 1
-                if clauses[j] == []:
-                    clauses.pop(j)
-                    j -= 1
-        j += 1
+    i = 0
+    while i < len(clauses):
+        j = 0
+        while j < len(vars) and clauses[i] != []:
+            if (vars[j] in clauses[i]) and (('not ' + vars[j]) in clauses[i]):
+                clauses[i] = []
+            else:
+                j += 1
+        if clauses[i] == []:
+            clauses.pop(i)
+        else:
+            i += 1
 
     return clauses
+
 
 def pprint(node):
     token = node[0]
@@ -249,6 +248,17 @@ def to_dimacs(circuit, vars):
     cnf_clauses = remove_truth(cnf_clauses, vars)
     cnf_clauses = order_literals(cnf_clauses)
 
+    i = 0
+    while i < len(cnf_clauses):
+        j = i + 1
+        while j < len(cnf_clauses):
+            if cnf_clauses[i] == cnf_clauses[j]:
+                cnf_clauses.pop(j)
+            else:
+                j += 1
+        i += 1
+
+
     outptut = []
     outptut.append(f"p cnf {len(vars)} {len(cnf_clauses)}\n")
     for clause in cnf_clauses:
@@ -264,13 +274,16 @@ def main():
     test_circuit1 = "((V1 or V3) and ((not V0) xor V2))"
     test_circuit2 = "(not ((V1 or V3) and ((not V0) xor V2)))"
 
-    # ast = Parser(test_circuit1)
+    # ast = Parser('(((not V1) xor V2) or (not ((not V4) and V3)))')
+    # ast = Parser(test_circuit2)
     # ast = ast.parse_expr()
+    # print(ast)
     # xorless = remove_xor(ast)
     # notless = push_not(xorless)
     # cnf = to_cnf(notless)
     # print(pprint(cnf))
     # clauses = into_clauses(cnf)
+    # print(clauses)
     # truthless = remove_truth(clauses, ['V0','V1','V2','V3'])
     # print(truthless)
     # ordered = order_literals(truthless)

@@ -1,4 +1,5 @@
 from circuit import circ
+from dimacs import to_dimacs
 import schemdraw
 from schemdraw.parsing import logicparse
 import sys
@@ -56,7 +57,8 @@ def text_ui():
         choice = input("What would you like to do today?\n" \
         "1) Create a circuit\n" \
         "2) Edit a circuit\n" \
-        "3) Quit\n")
+        "3) Circuit -> DIMACS\n" \
+        "4) Quit\n")
         match choice:
             case '1':
                 circuit = circ()
@@ -64,7 +66,7 @@ def text_ui():
                     circuit.add_var(f'V{i + 1}')
                 break
             case '2':
-                file_name = input("Provide the save file name:\n")
+                file_name = input("Provide the save file name (from circuits folder):\n")
                 file_path = os.path.join(os.getcwd(), 'circuits', file_name)
 
                 with open(file_path, 'r') as f:
@@ -76,6 +78,22 @@ def text_ui():
                                 )
                 break
             case '3':
+                file_name = input("Provide the save file name (from circuits folder):\n")
+                file_path = os.path.join(os.getcwd(), 'circuits', file_name)
+
+                with open(file_path, 'r') as f:
+                    save_file = json.loads(f.readline())
+                
+                dimacs = to_dimacs(save_file['circuit'], save_file['vars'])
+                
+                file_name = file_name[6:-5] + '.cnf'
+                file_path = os.path.join(os.getcwd(), 'dimacs', file_name)
+                with open(file_path, 'w') as f:
+                    f.writelines(dimacs)
+
+                print("DIMACS file path: " + file_path) 
+
+            case '4':
                 print("Have a nice day!")
                 sys.exit()
             case _:

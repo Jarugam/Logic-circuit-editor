@@ -1,0 +1,1 @@
+{"circuit": "(((not V1) xor V2) or (not ((not V4) and V3)))", "vars": ["V1", "V2", "V3", "V4"], "exprs": ["((not V1) xor V2) or (not ((not V4) and V3))"]}
