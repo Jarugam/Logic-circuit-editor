@@ -7,6 +7,9 @@ import json
 import time
 import os
 
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
 def pick_a_gate(circuit):
     while True:
         choice1 = input("Choose a gate to add:\n" \
@@ -14,13 +17,15 @@ def pick_a_gate(circuit):
         "2) and\n" \
         "3) or\n" \
         "4) xor\n")
+        clear_screen()
 
         if choice1 == '1':
             while True:
-                print("Choose an object:")
+                print("Choose an object:\n")
                 circuit.print_objects()
                 choice2 = input()
                 if int(choice2) > len(circuit.object_list) or int(choice2) < 1:
+                    clear_screen()
                     print("Wrong choice!")
                 else:
                     break
@@ -42,6 +47,7 @@ def pick_a_gate(circuit):
                 circuit.print_objects()
                 choice2 = input()
                 if int(choice2) > len(circuit.object_list) or int(choice2) < 1:
+                    clear_screen()
                     print("Wrong choice!")
                 else:
                     multi_choice.append(choice2)
@@ -50,6 +56,7 @@ def pick_a_gate(circuit):
             circuit.multi_gate(int(multi_choice[0]) - 1, int(multi_choice[1]) - 1, chosen_gate)
             return 0
         else:
+            clear_screen()
             print("Wrong choice!")
 
 def text_ui():
@@ -59,6 +66,7 @@ def text_ui():
         "2) Edit a circuit\n" \
         "3) Circuit -> DIMACS\n" \
         "4) Quit\n")
+        clear_screen()
         match choice:
             case '1':
                 circuit = circ()
@@ -90,13 +98,14 @@ def text_ui():
                 file_path = os.path.join(os.getcwd(), 'dimacs', file_name)
                 with open(file_path, 'w') as f:
                     f.writelines(dimacs)
-
+                clear_screen()
                 print("DIMACS file path: " + file_path) 
 
             case '4':
                 print("Have a nice day!")
                 sys.exit()
             case _:
+                clear_screen()
                 print("Wrong choice!")
 
     while True:
@@ -105,9 +114,11 @@ def text_ui():
         "3) Preview a cirucit\n" \
         "4) Save\n" \
         "5) Exit\n")
+        clear_screen()
         match choice:
             case '1':
                 pick_a_gate(circuit)
+                clear_screen()
                 print(f"New circuit added: {circuit.object_list[-1]}")
 
             case '2':
@@ -137,8 +148,10 @@ def text_ui():
                         
                         choice = input()
                         if int(choice) > len(circuit.expr_list) or int(choice) < 1:
+                            clear_screen()
                             print("Wrong choice!")
                         else:
+                            clear_screen()
                             break
 
                     with schemdraw.Drawing():
@@ -146,6 +159,7 @@ def text_ui():
             
             case '4':
                 if len(circuit.expr_list) == 0:
+                    clear_screen()
                     print("There's nothing to save...")
                 else:
                     while True:
@@ -155,6 +169,7 @@ def text_ui():
                         
                         choice = input()
                         if int(choice) > len(circuit.expr_list) or int(choice) < 1:
+                            clear_screen()
                             print("Wrong choice!")
                         else:
                             break
@@ -170,6 +185,7 @@ def text_ui():
                     file_path = os.path.join(os.getcwd(), 'circuits', 'saved_circuit' + current_time + '.circ')
                     with open(file_path, 'w') as f:
                         f.write(json.dumps(save_file))
+                    clear_screen()
                     print("Saved ciruit path: " + file_path)
 
                     image_path = os.path.join(os.getcwd(), 'circuits', 'circuit_image' + current_time + '.svg')
@@ -181,6 +197,7 @@ def text_ui():
                 break
             
             case _:
+                clear_screen()
                 print("Wrong choice!")
 
     return 0
