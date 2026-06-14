@@ -197,7 +197,6 @@ def remove_truth(clauses, vars):
 
     return clauses
 
-
 def pprint(node):
     token = node[0]
 
@@ -212,21 +211,74 @@ def pprint(node):
         f"{token} "
         f"{pprint(node[2])})"
     )
+
+def ordered_append(lit_list, var):
+    read = []
+
+    while lit_list != []:
+        if int(lit_list[0][-1]) > int(var[-1]):
+            return (read + [var] + lit_list)
+        read.append(lit_list.pop(0)) 
+
+    read.append(var)
+    return read
+
+def order_literals(clauses):
+    ordered_list = [] 
+    for clause in clauses:
+        literals = []
+        if clause[0][0] == 'n':
+            literals.append('-' + clause[0][-1])
+        else:
+            literals.append(clause[0][-1])
+        for var in clause[1:]:
+            if var[0] == 'n':
+                literals = ordered_append(literals, '-' + var[-1])
+            else:
+                literals = ordered_append(literals, var[-1])
+        ordered_list.append(literals)
+    return ordered_list
+
+def to_dimacs(circuit, vars):
+    ast = Parser(circuit).parse_expr()
+    
+    ast = remove_xor(ast)
+    ast = push_not(ast)
+    
+    cnf_clauses = into_clauses(to_cnf(ast))
+    cnf_clauses = remove_truth(cnf_clauses, vars)
+    cnf_clauses = order_literals(cnf_clauses)
+
+    outptut = []
+    outptut.append(f"p cnf {len(vars)} {len(cnf_clauses)}\n")
+    for clause in cnf_clauses:
+        text_line = ""
+        for var in clause:
+            text_line += (var + ' ') 
+        text_line += '0\n'
+        outptut.append(text_line)
+
+    return outptut
     
 def main():
     test_circuit1 = "((V1 or V3) and ((not V0) xor V2))"
     test_circuit2 = "(not ((V1 or V3) and ((not V0) xor V2)))"
 
-    ast = Parser(test_circuit1)
-    ast = ast.parse_expr()
-    xorless = remove_xor(ast)
-    notless = push_not(xorless)
-    cnf = to_cnf(notless)
-    print(pprint(cnf))
-    clauses = into_clauses(cnf)
-    print(clauses)
-    print(remove_truth(clauses, ['V0','V1','V2','V3']))
+    # ast = Parser(test_circuit1)
+    # ast = ast.parse_expr()
+    # xorless = remove_xor(ast)
+    # notless = push_not(xorless)
+    # cnf = to_cnf(notless)
+    # print(pprint(cnf))
+    # clauses = into_clauses(cnf)
+    # truthless = remove_truth(clauses, ['V0','V1','V2','V3'])
+    # print(truthless)
+    # ordered = order_literals(truthless)
+    # print(ordered)
 
+    dimacs_test = to_dimacs(test_circuit2, ['V0', 'V1', 'V2', 'V3'])
+    for line in dimacs_test:
+        print(line, end='')
 
 if __name__ == "__main__":
     main()
