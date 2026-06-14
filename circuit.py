@@ -1,8 +1,8 @@
 class circ:
     __slots__ = ['circuit', 'var_list', 'expr_list', 'object_list']
 
-    def __init__(self, vars = [], exprs = []):
-        self.circuit = ''
+    def __init__(self, circuit = '', vars = [], exprs = []):
+        self.circuit = circuit
         self.var_list = vars
         self.expr_list = exprs
         self.object_list = vars + exprs
@@ -24,7 +24,7 @@ class circ:
 
     def print_objects(self):
         for i in range(len(self.object_list)):
-            print(f"{i})\t {self.object_list[i]}")
+            print(f"{i + 1})\t {self.object_list[i]}")
 
     def not_gate(self, object):
         if object + 1 > len(self.var_list):
@@ -40,19 +40,36 @@ class circ:
         return 0
     
     def multi_gate(self, object1, object2, gate):
+        pop_queue = []
+
         if object1 + 1 > len(self.var_list):
-            self.expr_list.pop(object1 - len(self.var_list))
+            #self.expr_list.pop(object1 - len(self.var_list))
+            pop_queue.append(object1 - len(self.var_list))
             object1_name = '(' + self.object_list[object1] + ')'
         else:
             object1_name = self.object_list[object1]
         
         if object2 + 1 > len(self.var_list):
-            self.expr_list.pop(object2 - len(self.var_list))
+            # self.expr_list.pop(object2 - len(self.var_list))
+            pop_queue.append(object2 - len(self.var_list))
             object2_name = '(' + self.object_list[object2] + ')'
         else:
             object2_name = self.object_list[object2]
 
         new_expr = object1_name + ' ' + gate + ' ' + object2_name
+
+        if len(pop_queue) == 0:
+            pass
+        elif len(pop_queue) == 1:
+            self.expr_list.pop(pop_queue[0])
+        elif pop_queue[0] == pop_queue[1]:
+            self.expr_list.pop(pop_queue[0])
+        elif pop_queue[0] > pop_queue[1]:
+            self.expr_list.pop(pop_queue[0])
+            self.expr_list.pop(pop_queue[1])
+        elif pop_queue[1] > pop_queue[0]:
+            self.expr_list.pop(pop_queue[1])
+            self.expr_list.pop(pop_queue[0])            
 
         self.expr_list.append(new_expr)
         self.update_objects()
@@ -61,7 +78,7 @@ class circ:
     def finalize(self, i = -1):
         if not len(self.expr_list):
             raise Exception('no circuit to finalize')
-        self.circuit = self.expr_list[i]
+        self.circuit = '(' + self.expr_list[i] + ')'
 
 def main():
     test1 = circ()
@@ -71,9 +88,11 @@ def main():
     test1.not_gate(1)
     test1.multi_gate(0, 2, 'and')
     test1.multi_gate(0, 2, 'or')
+    test1.multi_gate(0, 0, 'xor')
+    test1.multi_gate(2, 2, 'and')
     print(test1.object_list)
-    test1.finalize()
-    print(test1.circuit)
+    #test1.finalize()
+    #print(test1.circuit)
 
 if __name__ == "__main__":
     main()
