@@ -149,6 +149,54 @@ def to_cnf(node):
 
     if token == "or":
         return distribute(left, right)
+    
+def gather_var(node):
+    token = node[0]
+    
+    if token == 'or':
+        return gather_var(node[1]) + gather_var(node[2])
+
+    if token == 'var':
+        return [node[1]]
+    
+    if token == 'not':
+        return ['not ' + node[1][1]]
+    
+def into_clauses(node):
+    token = node[0]
+
+    if token == 'and':
+        left = into_clauses(node[1])
+        right = into_clauses(node[2])
+        return left + right
+
+    if token == 'or':
+        return [gather_var(node[1]) + gather_var(node[2])]
+    
+    if token == 'var':
+        return [[node[1]]]
+    
+    if token == 'not':
+        return [['not ' + node[1][1]]]
+    
+def remove_truth(clauses, vars):
+    j = 0
+    while j < len(clauses):
+        for var in vars:
+            if (var in clauses[j]) and (('not ' + var) in clauses[j]):
+                i = 0
+                while i < len(clauses[j]):
+                    if (clauses[j][i] == var) or (clauses[j][i] == 'not ' + var):
+                        clauses[j].pop(i)
+                    else:
+                        i += 1
+                if clauses[j] == []:
+                    clauses.pop(j)
+                    j -= 1
+        j += 1
+
+    return clauses
+
 
 def pprint(node):
     token = node[0]
@@ -169,13 +217,15 @@ def main():
     test_circuit1 = "((V1 or V3) and ((not V0) xor V2))"
     test_circuit2 = "(not ((V1 or V3) and ((not V0) xor V2)))"
 
-    ast = Parser("(not (V1 xor V2))")
+    ast = Parser(test_circuit1)
     ast = ast.parse_expr()
     xorless = remove_xor(ast)
     notless = push_not(xorless)
-    print(pprint(notless))
     cnf = to_cnf(notless)
     print(pprint(cnf))
+    clauses = into_clauses(cnf)
+    print(clauses)
+    print(remove_truth(clauses, ['V0','V1','V2','V3']))
 
 
 if __name__ == "__main__":
