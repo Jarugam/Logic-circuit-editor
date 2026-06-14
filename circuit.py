@@ -78,7 +78,7 @@ class circ:
     def finalize(self, i = -1):
         if not len(self.expr_list):
             raise Exception('no circuit to finalize')
-        self.circuit = self.expr_list[i]
+        self.circuit = '(' + self.expr_list[i] + ')'
 
 def main():
     test1 = circ()
